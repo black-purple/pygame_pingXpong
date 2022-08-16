@@ -1,6 +1,7 @@
 # Ping X Pong
 
 A simple game using ```python``` and ```pygame```
+
 I only made this little game to challenge myself (and maybe try some advanced game developpement later if I like it)
 
 ## Progress
