@@ -1,6 +1,6 @@
 # BEGIN: imports
 import pygame
-# from sys import exit
+import random
 # END: imports
 
 # Starting pygame / Initializing pygame
@@ -28,13 +28,19 @@ pygame.display.set_caption(gameName, gameIconFileName)
 # BEGIN: Players
 leftPlayerSurface = pygame.Surface((30,(gameWinH * 30) / 100))
 leftPlayerRectangle = leftPlayerSurface.get_rect(midleft = (30,gameWinH/2))
-leftPlayerSurface.fill("White")
+leftPlayerSurface.fill((255,255,255))
 leftPlayerScore = 0
+leftPlayerPosition = gameWinH/2
+leftPlayerScoreText = gameFont.render(f"{leftPlayerScore}", True, "White")
+leftPlayerScoreRectangle = leftPlayerScoreText.get_rect(midright = (gameWinW/2 - 70, 40))
 
 rightPlayerSurface = pygame.Surface((30,(gameWinH * 30) / 100)) 
-rightPlayerSurface.fill("White")
+rightPlayerSurface.fill((255,255,255))
 rightPlayerRectangle = rightPlayerSurface.get_rect(midright = (gameWinW - 30,gameWinH/2))
 rightPlayerScore = 0
+rightPlayerPosition = gameWinH/2
+rightPlayerScoreText = gameFont.render(f"{rightPlayerScore}", True, "White")
+rightPlayerScoreRectangle = rightPlayerScoreText.get_rect(midleft = (gameWinW/2 + 70, 40))
 # END: Players
 
 clock = pygame.time.Clock()
@@ -49,8 +55,9 @@ rightSurface = pygame.Surface((gameWinW/2,gameWinH))
 rightSurface.fill((12, 36, 97))
 # END: right area
 
-leftPlayerScoreText = gameFont.render(f"Score: {leftPlayerScore}", True, "White")
-rightPlayerScoreText = gameFont.render(f"Score: {rightPlayerScore}", True, "White")
+# Ball settings
+ball = pygame.Rect(gameWinW/2 - 15, gameWinH/2 - 15, 30, 30)
+ballSpeedX, ballSpeedY = 12, 12
 
 # The game loop 
 while gameRunning:
@@ -60,24 +67,46 @@ while gameRunning:
             # Checking QUIT event
             case pygame.QUIT:
                 gameRunning = False
-            # Getting mouse position
-            case pygame.MOUSEMOTION:
-                leftPlayerRectangle = leftPlayerSurface.get_rect(midleft = (30,event.pos[1]))
-                leftPlayerSurface.fill("White")
+            # # Getting mouse position
+            # case pygame.MOUSEMOTION:
+            #     leftPlayerRectangle = leftPlayerSurface.get_rect(midleft = (30,event.pos[1]))
+            #     leftPlayerSurface.fill("White")
+            #     break
+    
+    # Getting all keys
+    keys = pygame.key.get_pressed()
+
+    # Cheking if the appropriate keys are active
+    if keys[pygame.K_UP]:   leftPlayerPosition -= 10;   rightPlayerRectangle.midright = (gameWinW - 30, leftPlayerPosition) # Moving the right player up
+    if keys[pygame.K_DOWN]: leftPlayerPosition += 10;   rightPlayerRectangle.midright = (gameWinW - 30, leftPlayerPosition) # Moving the right player down
+    if keys[pygame.K_w]:    rightPlayerPosition -= 10;  leftPlayerRectangle.midleft = (30, rightPlayerPosition) # Moving the left player up
+    if keys[pygame.K_s]:    rightPlayerPosition += 10;  leftPlayerRectangle.midleft = (30, rightPlayerPosition) # Moving the left player down
+    
+
+
 
     # Rendering player areas to the screen
     screen.blit(leftSurface, (0, 0))
     screen.blit(rightSurface, (gameWinW/2, 0))
 
     # Rendering player score to the screen
-    screen.blit(leftPlayerScoreText, (60, 20))
-    screen.blit(rightPlayerScoreText, (gameWinW - 260, 20))
+    screen.blit(leftPlayerScoreText, leftPlayerScoreRectangle)
+    screen.blit(rightPlayerScoreText, rightPlayerScoreRectangle)
 
     # Rendering players to the screen
     screen.blit(leftPlayerSurface, leftPlayerRectangle)
     screen.blit(rightPlayerSurface, rightPlayerRectangle)
 
-    # 
+    # Draw the ball on the screen and animate it
+    pygame.draw.ellipse(screen, (255,255,255), ball)
+    if ball.top <= 0 or ball.bottom >= gameWinH: ballSpeedY *= -1
+    if ball.left <= 0 or ball.right >= gameWinW: ballSpeedX *= -1
+    if ball.colliderect(leftPlayerRectangle) or ball.colliderect(rightPlayerRectangle): ballSpeedX *= -1
+
+    ball.x += ballSpeedX
+    ball.y += ballSpeedY
+    
+    # Updating the screen 
     pygame.display.update()
 
     # Setting max framerate
