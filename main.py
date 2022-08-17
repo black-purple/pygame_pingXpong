@@ -26,7 +26,7 @@ pygame.display.set_caption(gameName, gameIconFileName)
 # END: window settings
 
 # BEGIN: Players
-leftPlayerSurface = pygame.Surface((30,(gameWinH * 30) / 100))
+leftPlayerSurface = pygame.Surface((10, (gameWinH * 30) / 100))
 leftPlayerRectangle = leftPlayerSurface.get_rect(midleft = (30,gameWinH/2))
 leftPlayerSurface.fill((255,255,255))
 leftPlayerScore = 0
@@ -34,7 +34,7 @@ leftPlayerPosition = gameWinH/2
 leftPlayerScoreText = gameFont.render(f"{leftPlayerScore}", True, "White")
 leftPlayerScoreRectangle = leftPlayerScoreText.get_rect(midright = (gameWinW/2 - 70, 40))
 
-rightPlayerSurface = pygame.Surface((30,(gameWinH * 30) / 100)) 
+rightPlayerSurface = pygame.Surface((10, (gameWinH * 30) / 100)) 
 rightPlayerSurface.fill((255,255,255))
 rightPlayerRectangle = rightPlayerSurface.get_rect(midright = (gameWinW - 30,gameWinH/2))
 rightPlayerScore = 0
@@ -57,7 +57,8 @@ rightSurface.fill((12, 36, 97))
 
 # Ball settings
 ball = pygame.Rect(gameWinW/2 - 15, gameWinH/2 - 15, 30, 30)
-ballSpeedX, ballSpeedY = 12, 12
+ballSpeedX = 15 * random.choice((1, -1))
+ballSpeedY = 15 * random.choice((1, -1))
 
 # The game loop 
 while gameRunning:
@@ -77,13 +78,22 @@ while gameRunning:
     keys = pygame.key.get_pressed()
 
     # Cheking if the appropriate keys are active
-    if keys[pygame.K_UP]:   leftPlayerPosition -= 10;   rightPlayerRectangle.midright = (gameWinW - 30, leftPlayerPosition) # Moving the right player up
-    if keys[pygame.K_DOWN]: leftPlayerPosition += 10;   rightPlayerRectangle.midright = (gameWinW - 30, leftPlayerPosition) # Moving the right player down
-    if keys[pygame.K_w]:    rightPlayerPosition -= 10;  leftPlayerRectangle.midleft = (30, rightPlayerPosition) # Moving the left player up
-    if keys[pygame.K_s]:    rightPlayerPosition += 10;  leftPlayerRectangle.midleft = (30, rightPlayerPosition) # Moving the left player down
-    
-
-
+    if keys[pygame.K_w]:
+        # Moving the left player up
+        rightPlayerPosition -= 10
+        leftPlayerRectangle.midleft = (30, rightPlayerPosition) 
+    if keys[pygame.K_s]:
+        # Moving the left player down
+        rightPlayerPosition += 10
+        leftPlayerRectangle.midleft = (30, rightPlayerPosition) 
+    if keys[pygame.K_UP]:
+        # Moving the right player up
+        leftPlayerPosition -= 10
+        rightPlayerRectangle.midright = (gameWinW - 30, leftPlayerPosition) 
+    if keys[pygame.K_DOWN]:
+        # Moving the right player down
+        leftPlayerPosition += 10
+        rightPlayerRectangle.midright = (gameWinW - 30, leftPlayerPosition) 
 
     # Rendering player areas to the screen
     screen.blit(leftSurface, (0, 0))
@@ -100,7 +110,14 @@ while gameRunning:
     # Draw the ball on the screen and animate it
     pygame.draw.ellipse(screen, (255,255,255), ball)
     if ball.top <= 0 or ball.bottom >= gameWinH: ballSpeedY *= -1
-    if ball.left <= 0 or ball.right >= gameWinW: ballSpeedX *= -1
+    if ball.left <= 0: 
+        ball.center = (gameWinW/2, gameWinH/2)
+        rightPlayerScore += 1
+        rightPlayerScoreText = gameFont.render(f"{rightPlayerScore}", True, "White")
+    if ball.right >= gameWinW: 
+        ball.center = (gameWinW/2, gameWinH/2)
+        leftPlayerScore += 1
+        leftPlayerScoreText = gameFont.render(f"{leftPlayerScore}", True, "White")
     if ball.colliderect(leftPlayerRectangle) or ball.colliderect(rightPlayerRectangle): ballSpeedX *= -1
 
     ball.x += ballSpeedX
